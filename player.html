@@ -98,6 +98,7 @@
     // Activates knockout.js
     ko.applyBindings(state, document.getElementById('game'));
 
+    let currentAudio;
     const gameId = urlParams.get('game_id');
       var socket = io({query: { game_id: gameId }});
       socket.on('state_change', function(newStateString) {
@@ -107,7 +108,15 @@
           state[k](newState[k]);
         });
 
-        console.log(ko.toJS(state))
+        if(newState.music) {
+          if(currentAudio) {
+            currentAudio.pause();
+          }
+          currentAudio = new Audio(newState.music);
+          currentAudio.play();
+        }
+
+        console.log(newState)
       });
     </script>
   </body>

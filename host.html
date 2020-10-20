@@ -32,10 +32,12 @@
           <span data-bind="if: timerIsRunning">Time left: <strong data-bind="text: timeLeft"></strong></span>
         </div>
       </div>
-      <button type="button" class="btn btn-primary btn-lg btn-block" data-bind="click: actionBank, enable: timerIsRunning">BANK</button>
-      <button type="button" class="btn btn-success btn-lg btn-block" data-bind="click: actionCorrect, enable: timerIsRunning">CORRECT</button>
-      <button type="button" class="btn btn-danger btn-lg btn-block" data-bind="click: actionNope, enable: timerIsRunning">NOPE</button>
-      <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionStart, disable: timerIsRunning">START ROUND</button>
+      <button type="button" class="btn btn-info btn-lg btn-block" data-bind="click: actionStart, disable: timerIsRunning">START ROUND</button>
+      <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionDuDuDuDu">♪ DU DU DU DU ♪</button>
+
+      <button type="button" class="btn btn-primary btn-lg btn-block" data-bind="click: actionBank, visible: timerIsRunning">BANK</button>
+      <button type="button" class="btn btn-success btn-lg btn-block" data-bind="click: actionCorrect, visible: timerIsRunning">CORRECT</button>
+      <button type="button" class="btn btn-danger btn-lg btn-block" data-bind="click: actionNope, visible: timerIsRunning">NOPE</button>
 
       <div class="row mt-3">
         <div class="col">
@@ -65,7 +67,7 @@
     </div>
     <div class="row">
         <div class="col text-center">
-          Players URL: <a href="${PLAYER_URL}">${PLAYER_URL}</a>
+          Players URL: <a href="${PLAYER_URL}">${PLAYER_URL}</a> (connected: <span data-bind="text: connectedPlayersCount"></span>)
         </div>
       </div>
 
@@ -75,7 +77,6 @@
       const gameId = urlParams.get('game_id');
       var socket = io({query: { game_id: gameId, host: true }});
 
-      // This is a simple *viewmodel* - JavaScript that defines the data and behavior of your UI
       function AppViewModel() {
         this.steps = [0, 50, 100, 200, 400, 1000, 2000, 3000, 4000, 5000]
         this.bankAmount = ko.observable(0);
@@ -85,6 +86,8 @@
         this.roundDurationRaw = ko.observable(150);
         this.timeLeftRaw = ko.observable(150);
         this.timerIsRunning = ko.observable(false);
+        this.music = ko.observable(null);
+        this.connectedPlayersCount = ko.observable(0); // how many players are connected
 
         this.players = ko.computed(function() {
           return this.playersRaw().split(',');
@@ -133,6 +136,7 @@
           this.timerIsRunning(true);
           this.timeLeftRaw(this.roundDurationRaw());
           this.currentPlayerIndex(0);
+          this.playMusic('game.mp3')
           this.sendJSON();
 
           const i = setInterval(() => {
@@ -142,9 +146,24 @@
               clearInterval(i);
               this.timerIsRunning(false);
               this.currentStep(0);
+              this.playMusic("end.mp3");
             }
             this.sendJSON();
           }, 1000)
+        }
+
+        this.actionDuDuDuDu = () => {
+          this.playMusic("du-du-du-du.mp3");
+        }
+
+        this.playMusic = (musicName) => {
+          // Send music, and remove it immediately
+          this.music(musicName);
+          this.sendJSON();
+          this.music(null);
+          setTimeout(() => {
+            this.sendJSON();
+          }, 10);
         }
 
         this.moveToNextPlayer = () => {
@@ -168,6 +187,11 @@
       ko.applyBindings(state, document.getElementById('game'));
 
       state.sendJSON();
+
+      socket.on('user_count', (connectedPlayersCount) => {
+        console.log("User change", connectedPlayersCount)
+        state.connectedPlayersCount(connectedPlayersCount);
+      })
     </script>
   </body>
 </html>

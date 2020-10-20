@@ -49,10 +49,13 @@ io.on('connection', (socket) => {
   }
   else {
     rooms[gameId].players.push(socket);
+    if(rooms[gameId].host) {
+      rooms[gameId].host.emit('user_count', rooms[gameId].players.length);
+    }
     socket.emit('state_change', rooms[gameId].lastKnownState);
     socket.on('disconnect', () => {
       console.log('user disconnected from game', gameId);
-      const index = rooms[gameId].players.indexOf(5);
+      const index = rooms[gameId].players.indexOf(socket);
       if (index > -1) {
         rooms[gameId].players.splice(index, 1);
       }
