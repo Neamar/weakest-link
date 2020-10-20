@@ -96,6 +96,9 @@
         }
 
         this.actionCorrect = () => {
+          if(this.currentStep() >= this.steps.length - 1) {
+            return;
+          }
           this.currentStep(this.currentStep() + 1)
           this.moveToNextPlayer();
         }
