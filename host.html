@@ -60,16 +60,15 @@
       <div class="input-group">
         <div class="input-group-prepend">
             <span class="input-group-text" id="basic-addon1">#</span>
+        </div>
+        <input type="text" class="form-control" placeholder="Round duration" aria-label="Round duration" aria-describedby="basic-addon1" data-bind="value: roundDurationRaw, disable: timerIsRunning">
+      </div>
+      <div class="row">
+          <div class="col text-center">
+            Players URL: <a href="${PLAYER_URL}">${PLAYER_URL}</a> (connected: <span data-bind="text: connectedPlayersCount"></span>)
           </div>
-          <input type="text" class="form-control" placeholder="Round duration" aria-label="Round duration" aria-describedby="basic-addon1" data-bind="value: roundDurationRaw, disable: timerIsRunning">
         </div>
-      </div>
     </div>
-    <div class="row">
-        <div class="col text-center">
-          Players URL: <a href="${PLAYER_URL}">${PLAYER_URL}</a> (connected: <span data-bind="text: connectedPlayersCount"></span>)
-        </div>
-      </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>

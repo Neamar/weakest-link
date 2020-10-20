@@ -30,6 +30,7 @@ io.on('connection', (socket) => {
     rooms[gameId] = {
       host: null,
       players: [],
+      startedAt: Date.now(),
       lastKnownState: '{}',
     }
   }
@@ -43,15 +44,19 @@ io.on('connection', (socket) => {
       rooms[gameId].players.forEach(p => p.emit('state_change', newState))
     });
 
+    socket.emit('user_count', rooms[gameId].players.length);
+
     socket.on('disconnect', () => {
       rooms[gameId].host = null;
     });
   }
   else {
     rooms[gameId].players.push(socket);
+
     if(rooms[gameId].host) {
       rooms[gameId].host.emit('user_count', rooms[gameId].players.length);
     }
+
     socket.emit('state_change', rooms[gameId].lastKnownState);
     socket.on('disconnect', () => {
       console.log('user disconnected from game', gameId);
@@ -60,7 +65,7 @@ io.on('connection', (socket) => {
         rooms[gameId].players.splice(index, 1);
       }
 
-      if(rooms[gameId].players.length === 0) {
+      if(rooms[gameId].players.length === 0 && !rooms[gameId].host) {
         console.log('Terminating gameId ', gameId);
         delete rooms[gameId];
       }

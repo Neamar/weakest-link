@@ -65,10 +65,19 @@
       background-image: url('Current.png');
       padding-top: 5px;
     }
+
+    #nohost {
+      margin: auto;
+      margin-top: 10px;
+      text-align: center;
+      border: 2px solid red;
+      width: 240px;
+    }
     </style>
   </head>
   <body>
     <div id="game">
+      <div data-bind="visible: disabled" id="nohost">NO HOST CONNECTED</div>
       <ul id="ladder" data-bind="foreach: reversedSteps">
         <li data-bind="text: $data, class: $parent.valueStatus($index)"></li>
       </ul>
@@ -87,6 +96,7 @@
       currentStep: ko.observable(0),
       timeLeft: ko.observable(""),
       currentPlayer: ko.observable(""),
+      disabled: ko.observable(false),
     };
     state.reversedSteps = ko.computed(function() {
       return this.steps().slice(0).reverse();
@@ -102,6 +112,14 @@
     const gameId = urlParams.get('game_id');
       var socket = io({query: { game_id: gameId }});
       socket.on('state_change', function(newStateString) {
+        if(newStateString === '{}') {
+          state.disabled(true);
+          return;
+        }
+        else if(state.disabled()) {
+          state.disabled(false);
+        }
+
         const newState = JSON.parse(newStateString);
         // Mirror changes on main object
         ['steps', 'bankAmount', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep'].forEach(k => {
