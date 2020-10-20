@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
+var fs = require('fs');
 
 const rooms = {};
 
@@ -14,7 +15,8 @@ app.get('/player', (req, res) => {
 });
 
 app.get('/host', (req, res) => {
-  res.sendFile(__dirname + '/host.html');
+  const content = fs.readFileSync(__dirname + '/host.html').toString().replace(/\$\{PLAYER_URL\}/g, '/player.html?game_id=' + req.query.game_id);
+  res.write(content);
 });
 
 app.use(express.static('public'))
