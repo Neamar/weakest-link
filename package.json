@@ -2,6 +2,9 @@
   "name": "weakest-link",
   "version": "0.0.1",
   "description": "Web UI for the Weakest link",
+  "scripts": {
+    "start": "node index.js",
+  },
   "dependencies": {
     "express": "^4.17.1",
     "socket.io": "^2.3.0"
