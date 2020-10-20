@@ -12,30 +12,38 @@
   </head>
   <body>
 
-    <div class="container-fluid m-1" id="game">
+    <div class="container-fluid mt-1" id="game">
       <div class="row">
         <div class="col text-center">
           Bank: <span data-bind="text: bankAmount"></span>
         </div>
         <div class="col text-center">
+          Bank this round: <span data-bind="text: bankAmountThisRound"></span>
+        </div>
+        <div class="col text-center">
           Current amount: <span data-bind="text: currentAmount"></span>
         </div>
-        <div class="col text-center">
-          Round duration: <span data-bind="text: roundDuration"></span>
-        </div>
       </div>
-      <div class="row">
-        <div class="col text-center">
-          Player: <strong data-bind="text: currentPlayer"></strong>
-        </div>
-        <div class="col text-center">
-          <span data-bind="if: timerIsRunning">Time left: <strong data-bind="text: timeLeft"></strong></span>
-        </div>
-      </div>
-      <button type="button" class="btn btn-info btn-lg btn-block" data-bind="click: actionStart, disable: timerIsRunning">START ROUND</button>
-      <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionDuDuDuDu">♪ DU DU DU DU ♪</button>
+      <button type="button" class="btn btn-info btn-lg btn-block" data-bind="click: actionStart, hidden: timerIsRunning">
+        <span data-bind="hidden: timerIsRunning">START ROUND</span>
+      </button>
 
-      <button type="button" class="btn btn-primary btn-lg btn-block" data-bind="click: actionBank, visible: timerIsRunning">BANK</button>
+      <div class="row mt-2" data-bind="hidden: timerIsRunning">
+        <div class="col">
+          <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionDuDuDuDu">♪ DU DU DU DU ♪</button>
+        </div>
+        <div class="col">
+          <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionGoodbye">♪ GOODBYE ♪</button>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-info btn-lg btn-block mt-2" disabled data-bind="visible: timerIsRunning">
+        Current player: <strong data-bind="text: currentPlayer"></strong><br />
+        <span data-bind="visible: timerIsRunning">Time left: <strong data-bind="text: timeLeft"></strong></span>
+
+      </button>
+
+      <button type="button" class="btn btn-primary btn-lg btn-block mt-2" data-bind="click: actionBank, visible: timerIsRunning">BANK</button>
       <button type="button" class="btn btn-success btn-lg btn-block" data-bind="click: actionCorrect, visible: timerIsRunning">CORRECT</button>
       <button type="button" class="btn btn-danger btn-lg btn-block" data-bind="click: actionNope, visible: timerIsRunning">NOPE</button>
 
@@ -54,18 +62,22 @@
 
       <div class="row mt-3">
         <div class="col">
-          How long (in seconds) should a round last?
+          How long (in seconds) should a round last? (<span data-bind="text: roundDuration"></span>)
         </div>
       </div>
       <div class="input-group">
         <div class="input-group-prepend">
             <span class="input-group-text" id="basic-addon1">#</span>
         </div>
-        <input type="text" class="form-control" placeholder="Round duration" aria-label="Round duration" aria-describedby="basic-addon1" data-bind="value: roundDurationRaw, disable: timerIsRunning">
+        <input type="number" class="form-control" placeholder="Round duration" aria-label="Round duration" aria-describedby="basic-addon1" data-bind="value: roundDurationRaw, disable: timerIsRunning" min="10" max="150" step="10">
       </div>
       <div class="row">
           <div class="col text-center">
             Players URL: <a href="${PLAYER_URL}">${PLAYER_URL}</a> (connected: <span data-bind="text: connectedPlayersCount"></span>)
+            <span data-bind="if: timerIsRunning">
+              <br />
+              <a href="#" data-bind="click: actionStopRound">Stop round early</a>
+            </span>
           </div>
         </div>
     </div>
@@ -79,6 +91,7 @@
       function AppViewModel() {
         this.steps = [0, 50, 100, 200, 400, 1000, 2000, 3000, 4000, 5000]
         this.bankAmount = ko.observable(0);
+        this.bankAmountThisRound = ko.observable(0);
         this.currentStep = ko.observable(0);
         this.currentPlayerIndex = ko.observable(0);
         this.playersRaw = ko.observable('Player1,Player2,Player3');
@@ -111,6 +124,7 @@
 
         this.actionBank = () => {
           this.bankAmount(this.bankAmount() + this.currentAmount());
+          this.bankAmountThisRound(this.bankAmountThisRound() + this.currentAmount());
           this.currentStep(0);
           this.sendJSON();
         }
@@ -130,22 +144,21 @@
           this.sendJSON();
         }
 
+        let intervalId;
         this.actionStart = () => {
           this.currentStep(0);
+          this.bankAmountThisRound(0);
           this.timerIsRunning(true);
           this.timeLeftRaw(this.roundDurationRaw());
           this.currentPlayerIndex(0);
           this.playMusic('game.mp3')
           this.sendJSON();
 
-          const i = setInterval(() => {
+          intervalId = setInterval(() => {
             this.timeLeftRaw(this.timeLeftRaw() - 1);
 
             if(this.timeLeftRaw() <= 0) {
-              clearInterval(i);
-              this.timerIsRunning(false);
-              this.currentStep(0);
-              this.playMusic("end.mp3");
+              this.actionStopRound();
             }
             this.sendJSON();
           }, 1000)
@@ -153,6 +166,17 @@
 
         this.actionDuDuDuDu = () => {
           this.playMusic("du-du-du-du.mp3");
+        }
+
+        this.actionGoodbye = () => {
+          this.playMusic("goodbye.mp3");
+        }
+
+        this.actionStopRound = () => {
+          clearInterval(intervalId);
+          this.timerIsRunning(false);
+          this.currentStep(0);
+          this.playMusic("end.mp3");
         }
 
         this.playMusic = (musicName) => {

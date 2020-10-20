@@ -81,7 +81,7 @@
       <ul id="ladder" data-bind="foreach: reversedSteps">
         <li data-bind="text: $data, class: $parent.valueStatus($index)"></li>
       </ul>
-      <div id="bank" data-bind="text: bankAmount"></div>
+      <div id="bank" data-bind="text: bankAmountThisRound"></div>
 
       <div id="timer" data-bind="text: timeLeft"></div>
     </div>
@@ -91,7 +91,7 @@
 
     let state = {
       steps: ko.observable([]),
-      bankAmount: ko.observable(0),
+      bankAmountThisRound: ko.observable(0),
       currentAmount: ko.observable(0),
       currentStep: ko.observable(0),
       timeLeft: ko.observable(""),
@@ -122,7 +122,7 @@
 
         const newState = JSON.parse(newStateString);
         // Mirror changes on main object
-        ['steps', 'bankAmount', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep'].forEach(k => {
+        ['steps', 'bankAmountThisRound', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep'].forEach(k => {
           state[k](newState[k]);
         });
 
@@ -131,7 +131,12 @@
             currentAudio.pause();
           }
           currentAudio = new Audio(newState.music);
+          currentAudio.volume = 0.5;
           currentAudio.play();
+        }
+
+        if(!newState.timerIsRunning) {
+          state.timeLeft(newState.roundDuration);
         }
 
         console.log(newState)
