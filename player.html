@@ -92,7 +92,6 @@
       return this.steps().slice(0).reverse();
     }, state);
     state.valueStatus = function(index) {
-      console.log(this.currentStep() <= index())
       return (this.steps().length - this.currentStep()) <= index() ? "active" : "";
     };
 

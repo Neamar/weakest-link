@@ -93,6 +93,7 @@
         this.actionBank = () => {
           this.bankAmount(this.bankAmount() + this.currentAmount());
           this.currentStep(0);
+          this.sendJSON();
         }
 
         this.actionCorrect = () => {
@@ -101,11 +102,13 @@
           }
           this.currentStep(this.currentStep() + 1)
           this.moveToNextPlayer();
+          this.sendJSON();
         }
 
         this.actionNope = () => {
           this.currentStep(0);
           this.moveToNextPlayer();
+          this.sendJSON();
         }
 
         this.actionStart = () => {
@@ -113,6 +116,7 @@
           this.timerIsRunning(true);
           this.timeLeftRaw(this.roundDurationRaw());
           this.currentPlayerIndex(0);
+          this.sendJSON();
 
           const i = setInterval(() => {
             this.timeLeftRaw(this.timeLeftRaw() - 1);
@@ -122,27 +126,29 @@
               this.timerIsRunning(false);
               this.currentStep(0);
             }
+            this.sendJSON();
           }, 1000)
         }
 
         this.moveToNextPlayer = () => {
-          this.currentPlayerIndex(this.currentPlayerIndex() + 1)
+          this.currentPlayerIndex(this.currentPlayerIndex() + 1);
+          this.sendJSON();
+        }
+
+        var lastSentJson = {};
+        this.sendJSON = () => {
+          // Only send if something changed
+          var jsonData = ko.toJSON(state);
+          if(lastSentJson !== jsonData) {
+            socket.emit('update_state', jsonData)
+            lastSentJson = jsonData;
+          }
         }
       }
 
       const state = new AppViewModel();
       // Activates knockout.js
       ko.applyBindings(state, document.getElementById('game'));
-
-      var lastSentJson = {};
-      setInterval(() => {
-        var jsonData = ko.toJSON(state);
-        if(lastSentJson !== jsonData) {
-          socket.emit('update_state', jsonData)
-          lastSentJson = jsonData;
-        }
-      }, 1000)
-
     </script>
   </body>
 </html>
