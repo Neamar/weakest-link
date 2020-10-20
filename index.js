@@ -34,14 +34,18 @@ io.on('connection', (socket) => {
     }
   }
 
-  if(isHost) {
+  if(isHost && !rooms[gameId].host) {
     rooms[gameId].host = socket;
 
     socket.on('update_state', function(newState) {
       console.log('Received a new state, broadcasting')
       rooms[gameId].lastKnownState = newState;
       rooms[gameId].players.forEach(p => p.emit('state_change', newState))
-    })
+    });
+
+    socket.on('disconnect', () => {
+      rooms[gameId].host = null;
+    });
   }
   else {
     rooms[gameId].players.push(socket);
