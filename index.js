@@ -16,7 +16,7 @@ app.get('/player', (req, res) => {
 
 app.get('/host', (req, res) => {
   const content = fs.readFileSync(__dirname + '/host.html').toString().replace(/\$\{PLAYER_URL\}/g, '/player.html?game_id=' + req.query.game_id);
-  res.write(content);
+  res.send(content);
 });
 
 app.use(express.static('public'))
