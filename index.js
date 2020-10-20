@@ -1,11 +1,12 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
 const rooms = {};
 
 app.get('/', (req, res) => {
-  res.redirect('/host?game_id=' + Math.random());
+  res.redirect('/host?game_id=' + Math.random().toString().replace('0.', ''));
 });
 
 app.get('/player', (req, res) => {
@@ -16,6 +17,8 @@ app.get('/host', (req, res) => {
   res.sendFile(__dirname + '/host.html');
 });
 
+app.use(express.static('public'))
+
 io.on('connection', (socket) => {
   const gameId = socket.handshake.query.game_id;
   const isHost = socket.handshake.query.host;
@@ -24,7 +27,8 @@ io.on('connection', (socket) => {
   if(!rooms[gameId]) {
     rooms[gameId] = {
       host: null,
-      players: []
+      players: [],
+      lastKnownState: '{}',
     }
   }
 
@@ -33,11 +37,13 @@ io.on('connection', (socket) => {
 
     socket.on('update_state', function(newState) {
       console.log('Received a new state, broadcasting')
+      rooms[gameId].lastKnownState = newState;
       rooms[gameId].players.forEach(p => p.emit('state_change', newState))
     })
   }
   else {
     rooms[gameId].players.push(socket);
+    socket.emit('state_change', rooms[gameId].lastKnownState);
     socket.on('disconnect', () => {
       console.log('user disconnected from game', gameId);
       const index = rooms[gameId].players.indexOf(5);

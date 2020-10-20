@@ -58,9 +58,9 @@
       const gameId = urlParams.get('game_id');
       var socket = io({query: { game_id: gameId, host: true }});
 
-      const steps = [0, 50, 100, 200, 400, 1000, 2000, 3000, 4000, 5000]
       // This is a simple *viewmodel* - JavaScript that defines the data and behavior of your UI
       function AppViewModel() {
+        this.steps = [0, 50, 100, 200, 400, 1000, 2000, 3000, 4000, 5000]
         this.bankAmount = ko.observable(0);
         this.currentStep = ko.observable(0);
         this.currentPlayerIndex = ko.observable(0);
@@ -87,7 +87,7 @@
         }, this);
 
         this.currentAmount = ko.computed(function() {
-          return steps[this.currentStep()];
+          return this.steps[this.currentStep()];
         }, this);
 
         this.actionBank = () => {
@@ -117,6 +117,7 @@
             if(this.timeLeftRaw() <= 0) {
               clearInterval(i);
               this.timerIsRunning(false);
+              this.currentStep(0);
             }
           }, 1000)
         }
@@ -130,7 +131,15 @@
       // Activates knockout.js
       ko.applyBindings(state, document.getElementById('game'));
 
-      socket.emit('update_state', JSON.stringify(state))
+      var lastSentJson = {};
+      setInterval(() => {
+        var jsonData = ko.toJSON(state);
+        if(lastSentJson !== jsonData) {
+          socket.emit('update_state', jsonData)
+          lastSentJson = jsonData;
+        }
+      }, 1000)
+
     </script>
   </body>
 </html>

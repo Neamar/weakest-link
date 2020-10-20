@@ -2,15 +2,106 @@
 <html>
   <head>
     <title>The weakest link</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@900&display=swap" rel="stylesheet">
+    <style>
+    body {
+      background: black;
+      color: white;
+      font-family: 'Titillium Web', sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+    }
+
+    #game {
+      width: 800px;
+      height: 600px;
+      border: 1px solid white;
+      position: relative;
+    }
+
+    #bank {
+      position: absolute;
+      left: 15px;
+      bottom: 15px;
+      background-image: url('Bank.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      text-align: center;
+      width: 140px;
+      height: 72px;
+      font-size: 35px;
+    }
+
+    #timer {
+      position: absolute;
+      right: 15px;
+      bottom: 15px;
+      background-image: url('Clock.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      padding: 15px 30px 30px 30px;
+    }
+
+    #ladder li {
+      list-style-type: none;
+      background-image: url('Next.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      text-align: center;
+      width: 90px;
+      height: 43px;
+      padding-top: 2px;
+    }
+
+    #ladder li.active {
+      background-image: url('Current.png');
+      padding-top: 5px;
+    }
+    </style>
   </head>
   <body>
+    <div id="game">
+      <ul id="ladder" data-bind="foreach: reversedSteps">
+        <li data-bind="text: $data, class: $parent.valueStatus($index)"></li>
+      </ul>
+      <div id="bank" data-bind="text: bankAmount"></div>
+
+      <div id="timer" data-bind="text: timeLeft"></div>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
     const urlParams = new URLSearchParams(window.location.search);
+
+    let state = {
+      steps: ko.observable([]),
+      bankAmount: ko.observable(0),
+      currentAmount: ko.observable(0),
+      currentStep: ko.observable(0),
+      timeLeft: ko.observable(""),
+      currentPlayer: ko.observable(""),
+    };
+    state.reversedSteps = ko.computed(function() {
+      return this.steps().slice(0).reverse();
+    }, state);
+    state.valueStatus = function(index) {
+      console.log(this.currentStep() <= index())
+      return (this.steps().length - this.currentStep()) <= index() ? "active" : "";
+    };
+
+    // Activates knockout.js
+    ko.applyBindings(state, document.getElementById('game'));
+
     const gameId = urlParams.get('game_id');
       var socket = io({query: { game_id: gameId }});
-      socket.on('state_change', function(state) {
-        console.log(state)
+      socket.on('state_change', function(newStateString) {
+        const newState = JSON.parse(newStateString);
+        // Mirror changes on main object
+        ['steps', 'bankAmount', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep'].forEach(k => {
+          state[k](newState[k]);
+        });
+
+        console.log(ko.toJS(state))
       });
     </script>
   </body>
