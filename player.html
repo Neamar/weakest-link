@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head>
+    <title>The weakest link</title>
+  </head>
+  <body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get('game_id');
+      var socket = io({query: { game_id: gameId }});
+      socket.on('state_change', function(state) {
+        console.log(state)
+      });
+    </script>
+  </body>
+</html>
