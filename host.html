@@ -8,27 +8,48 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.js"></script>
-    <title>Hello, world!</title>
+    <title>Host interface</title>
   </head>
   <body>
 
-    <div class="container-fluid m-1">
+    <div class="container-fluid m-1" id="game">
       <div class="row">
         <div class="col text-center">
-          Bank: <span data-bind="text: bank"></span>
+          Bank: <span data-bind="text: bankAmount"></span>
         </div>
         <div class="col text-center">
-          Current amount: <span data-bind="text: currentScore"></span>
+          Current amount: <span data-bind="text: currentAmount"></span>
+        </div>
+        <div class="col text-center">
+          Round duration: <span data-bind="text: roundDuration"></span>
         </div>
       </div>
       <div class="row">
         <div class="col text-center">
           Player: <strong data-bind="text: currentPlayer"></strong>
         </div>
+        <div class="col text-center">
+          <span data-bind="if: timerIsRunning">Time left: <strong data-bind="text: timeLeft"></strong></span>
+        </div>
       </div>
-      <button type="button" class="btn btn-primary btn-lg btn-block" id="bank">BANK</button>
-      <button type="button" class="btn btn-success btn-lg btn-block" id="correct">CORRECT</button>
-      <button type="button" class="btn btn-danger btn-lg btn-block" id="nope">NOPE</button>
+      <button type="button" class="btn btn-primary btn-lg btn-block" data-bind="click: actionBank, enable: timerIsRunning">BANK</button>
+      <button type="button" class="btn btn-success btn-lg btn-block" data-bind="click: actionCorrect, enable: timerIsRunning">CORRECT</button>
+      <button type="button" class="btn btn-danger btn-lg btn-block" data-bind="click: actionNope, enable: timerIsRunning">NOPE</button>
+      <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionStart, disable: timerIsRunning">START ROUND</button>
+
+      <div class="input-group mt-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon1">@</span>
+        </div>
+        <input type="text" class="form-control" placeholder="Usernames (comma-separated)" aria-label="Usernames" aria-describedby="basic-addon1" data-bind="value: playersRaw">
+      </div>
+      <div class="input-group mt-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">#</span>
+          </div>
+          <input type="text" class="form-control" placeholder="Round duration" aria-label="Round duration" aria-describedby="basic-addon1" data-bind="value: roundDurationRaw">
+        </div>
+      </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -37,20 +58,77 @@
       const gameId = urlParams.get('game_id');
       var socket = io({query: { game_id: gameId, host: true }});
 
-      const state = {
-        bank: 0,
-        current: 0
-      };
-
+      const steps = [0, 50, 100, 200, 400, 1000, 2000, 3000, 4000, 5000]
       // This is a simple *viewmodel* - JavaScript that defines the data and behavior of your UI
       function AppViewModel() {
-          this.bank = 0;
-          this.currentScore = 0;
-          this.currentPlayer = "?";
+        this.bankAmount = ko.observable(0);
+        this.currentStep = ko.observable(0);
+        this.currentPlayerIndex = ko.observable(0);
+        this.playersRaw = ko.observable('Player1,Player2,Player3');
+        this.roundDurationRaw = ko.observable(150);
+        this.timeLeftRaw = ko.observable(150);
+        this.timerIsRunning = ko.observable(false);
+
+        this.players = ko.computed(function() {
+          return this.playersRaw().split(',');
+        }, this);
+
+        this.currentPlayer = ko.computed(function() {
+          const p = this.players();
+          return p[this.currentPlayerIndex() % p.length]
+        }, this);
+
+        this.roundDuration = ko.computed(function() {
+          return `${Math.floor(this.roundDurationRaw() / 60)}m${Math.floor(this.roundDurationRaw() % 60)}s`
+        }, this);
+
+        this.timeLeft = ko.computed(function() {
+          return `${Math.floor(this.timeLeftRaw() / 60)}m${Math.floor(this.timeLeftRaw() % 60)}s`
+        }, this);
+
+        this.currentAmount = ko.computed(function() {
+          return steps[this.currentStep()];
+        }, this);
+
+        this.actionBank = () => {
+          this.bankAmount(this.bankAmount() + this.currentAmount());
+          this.currentStep(0);
+        }
+
+        this.actionCorrect = () => {
+          this.currentStep(this.currentStep() + 1)
+          this.moveToNextPlayer();
+        }
+
+        this.actionNope = () => {
+          this.currentStep(0);
+          this.moveToNextPlayer();
+        }
+
+        this.actionStart = () => {
+          this.currentStep(0);
+          this.timerIsRunning(true);
+          this.timeLeftRaw(this.roundDurationRaw());
+          this.currentPlayerIndex(0);
+
+          const i = setInterval(() => {
+            this.timeLeftRaw(this.timeLeftRaw() - 1);
+
+            if(this.timeLeftRaw() <= 0) {
+              clearInterval(i);
+              this.timerIsRunning(false);
+            }
+          }, 1000)
+        }
+
+        this.moveToNextPlayer = () => {
+          this.currentPlayerIndex(this.currentPlayerIndex() + 1)
+        }
       }
 
+      const state = new AppViewModel();
       // Activates knockout.js
-      ko.applyBindings(new AppViewModel());
+      ko.applyBindings(state, document.getElementById('game'));
 
       socket.emit('update_state', JSON.stringify(state))
     </script>
