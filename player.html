@@ -92,7 +92,7 @@
       return this.steps().slice(0).reverse();
     }, state);
     state.valueStatus = function(index) {
-      return (this.steps().length - this.currentStep()) <= index() ? "active" : "";
+      return (this.steps().length - this.currentStep() - 1) <= index() ? "active" : "";
     };
 
     // Activates knockout.js

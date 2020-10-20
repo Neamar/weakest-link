@@ -166,6 +166,8 @@
       const state = new AppViewModel();
       // Activates knockout.js
       ko.applyBindings(state, document.getElementById('game'));
+
+      state.sendJSON();
     </script>
   </body>
 </html>
