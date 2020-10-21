@@ -39,6 +39,7 @@
 
       <button type="button" class="btn btn-info btn-lg btn-block mt-2" disabled data-bind="visible: timerIsRunning">
         Current player: <strong data-bind="text: currentPlayer"></strong><br />
+        <span data-bind="if: hasQuestionAvailable"><span data-bind="text: currentQuestion"></span><br /></span>
         <span data-bind="visible: timerIsRunning">Time left: <strong data-bind="text: timeLeft"></strong></span>
 
       </button>
@@ -67,20 +68,27 @@
       </div>
       <div class="input-group">
         <div class="input-group-prepend">
-            <span class="input-group-text" id="basic-addon1">#</span>
+          <span class="input-group-text" id="basic-addon1">#</span>
         </div>
         <input type="number" class="form-control" placeholder="Round duration" aria-label="Round duration" aria-describedby="basic-addon1" data-bind="value: roundDurationRaw, disable: timerIsRunning" min="10" max="150" step="10">
       </div>
-      <div class="row">
-          <div class="col text-center">
-            Players URL: <a href="${PLAYER_URL}">${PLAYER_URL}</a> (connected: <span data-bind="text: connectedPlayersCount"></span>)
-            <span data-bind="if: timerIsRunning">
-              <br />
-              <a href="#" data-bind="click: actionStopRound">Stop round early</a>
-            </span>
-          </div>
+      <div class="row mt-3">
+        <div class="col">
+          <small>[Optional]</small> Enter question list here, separated with a newline :
+          <textarea class="form-control" placeholder="What is Question 1 ? (answer)" rows="3" data-bind="value: questionsRaw"></textarea>
         </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col text-center">
+          Players URL: <a href="${PLAYER_URL}">${PLAYER_URL}</a> (connected: <span data-bind="text: connectedPlayersCount"></span>)
+          <span data-bind="if: timerIsRunning">
+            <br />
+            <a href="#" data-bind="click: actionStopRound">Stop round early</a>
+          </span>
+        </div>
+      </div>
     </div>
+
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -100,6 +108,8 @@
         this.timerIsRunning = ko.observable(false);
         this.music = ko.observable(null);
         this.connectedPlayersCount = ko.observable(0); // how many players are connected
+        this.currentQuestionIndex = ko.observable(0);
+        this.questionsRaw = ko.observable('');
 
         this.players = ko.computed(function() {
           return this.playersRaw().split(',');
@@ -122,6 +132,18 @@
           return this.steps[this.currentStep()];
         }, this);
 
+        this.questions = ko.computed(function() {
+          return this.questionsRaw().split('\n');
+        }, this)
+
+        this.currentQuestion = ko.computed(function() {
+          return this.questions()[this.currentQuestionIndex()];
+        }, this);
+
+        this.hasQuestionAvailable = ko.computed(function() {
+          return this.questions().length > this.currentQuestionIndex();
+        }, this);
+
         this.actionBank = () => {
           this.bankAmount(this.bankAmount() + this.currentAmount());
           this.bankAmountThisRound(this.bankAmountThisRound() + this.currentAmount());
@@ -133,13 +155,15 @@
           if(this.currentStep() >= this.steps.length - 1) {
             return;
           }
-          this.currentStep(this.currentStep() + 1)
+          this.currentStep(this.currentStep() + 1);
+          this.currentQuestionIndex(this.currentQuestionIndex() + 1);
           this.moveToNextPlayer();
           this.sendJSON();
         }
 
         this.actionNope = () => {
           this.currentStep(0);
+          this.currentQuestionIndex(this.currentQuestionIndex() + 1);
           this.moveToNextPlayer();
           this.sendJSON();
         }
@@ -212,7 +236,6 @@
       state.sendJSON();
 
       socket.on('user_count', (connectedPlayersCount) => {
-        console.log("User change", connectedPlayersCount)
         state.connectedPlayersCount(connectedPlayersCount);
       })
     </script>
