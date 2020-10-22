@@ -101,7 +101,6 @@
         this.bankAmount = ko.observable(0);
         this.bankAmountThisRound = ko.observable(0);
         this.currentStep = ko.observable(0);
-        this.currentPlayerIndex = ko.observable(0);
         this.playersRaw = ko.observable('Player1,Player2,Player3');
         this.roundDurationRaw = ko.observable(150);
         this.timeLeftRaw = ko.observable(150);
@@ -117,10 +116,11 @@
 
         this.currentPlayer = ko.computed(function() {
           const p = this.players();
-          return p[this.currentPlayerIndex() % p.length]
+          return p[this.currentQuestionIndex() % p.length]
         }, this);
 
         this.roundDuration = ko.computed(function() {
+          setTimeout(() => this.sendJSON(), 1);
           return `${Math.floor(this.roundDurationRaw() / 60)}m${Math.floor(this.roundDurationRaw() % 60)}s`
         }, this);
 
@@ -157,14 +157,12 @@
           }
           this.currentStep(this.currentStep() + 1);
           this.currentQuestionIndex(this.currentQuestionIndex() + 1);
-          this.moveToNextPlayer();
           this.sendJSON();
         }
 
         this.actionNope = () => {
           this.currentStep(0);
           this.currentQuestionIndex(this.currentQuestionIndex() + 1);
-          this.moveToNextPlayer();
           this.sendJSON();
         }
 
@@ -174,7 +172,6 @@
           this.bankAmountThisRound(0);
           this.timerIsRunning(true);
           this.timeLeftRaw(this.roundDurationRaw());
-          this.currentPlayerIndex(0);
           this.playMusic('game.mp3')
           this.sendJSON();
 
@@ -200,6 +197,8 @@
           clearInterval(intervalId);
           this.timerIsRunning(false);
           this.currentStep(0);
+          // Consume the current question to make sure it's not displayed again next round
+          this.currentQuestionIndex(this.currentQuestionIndex() + 1);
           this.playMusic("end.mp3");
         }
 
@@ -213,15 +212,11 @@
           }, 10);
         }
 
-        this.moveToNextPlayer = () => {
-          this.currentPlayerIndex(this.currentPlayerIndex() + 1);
-          this.sendJSON();
-        }
-
         var lastSentJson = {};
         this.sendJSON = () => {
           // Only send if something changed
           var jsonData = ko.toJSON(state);
+          delete jsonData.questionsRaw;
           if(lastSentJson !== jsonData) {
             socket.emit('update_state', jsonData)
             lastSentJson = jsonData;
