@@ -142,7 +142,7 @@
         }, this);
 
         this.questions = ko.computed(function() {
-          return this.questionsRaw().split('\n');
+          return this.questionsRaw().split('\n').filter(Boolean);
         }, this)
 
         this.currentQuestion = ko.computed(function() {
@@ -226,8 +226,12 @@
         var lastSentJson = {};
         this.sendJSON = () => {
           // Only send if something changed
-          var jsonData = ko.toJSON(state);
-          delete jsonData.questionsRaw;
+          const whitelist = ['steps', 'bankAmountThisRound', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep', 'music', 'timerIsRunning']
+          const data = {};
+          whitelist.forEach(k => {
+            data[k] = typeof(this[k]) === "function" ? this[k]() : this[k];
+          });
+          const jsonData = JSON.stringify(data);
           if(lastSentJson !== jsonData) {
             socket.emit('update_state', jsonData)
             lastSentJson = jsonData;
