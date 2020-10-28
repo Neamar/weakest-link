@@ -38,15 +38,19 @@
       </div>
 
       <button type="button" class="btn btn-info btn-lg btn-block mt-2" disabled data-bind="visible: timerIsRunning">
-        Current player: <strong data-bind="text: currentPlayer"></strong><br />
+        <strong data-bind="text: currentPlayer"></strong><br />
         <span data-bind="if: hasQuestionAvailable"><span data-bind="text: currentQuestion"></span><br /></span>
-        <span data-bind="visible: timerIsRunning">Time left: <strong data-bind="text: timeLeft"></strong></span>
-
       </button>
 
       <button type="button" class="btn btn-primary btn-lg btn-block mt-2" data-bind="click: actionBank, visible: timerIsRunning">BANK</button>
       <button type="button" class="btn btn-success btn-lg btn-block" data-bind="click: actionCorrect, visible: timerIsRunning">CORRECT</button>
       <button type="button" class="btn btn-danger btn-lg btn-block" data-bind="click: actionNope, visible: timerIsRunning">NOPE</button>
+
+      <div class="row mt-3">
+        <div class="col text-center">
+          <p data-bind="text: timeLeft, visible: timerIsRunning" class="lead" style="font-family: monospace"></p>
+        </div>
+      </div>
 
       <div class="row mt-3">
         <div class="col">
@@ -74,7 +78,7 @@
       </div>
       <div class="row mt-3">
         <div class="col">
-          <small>[Optional]</small> Enter question list here, separated with a newline :
+          <small>[Optional]</small> Enter questions list here, separated with a newline :
           <textarea class="form-control" placeholder="What is Question 1 ? (answer)" rows="3" data-bind="value: questionsRaw"></textarea>
         </div>
       </div>
@@ -87,12 +91,13 @@
           </span>
         </div>
       </div>
-      <div class="row mt-3" data-bind="if: questionsFailedThisRound().length > 0 && !timerIsRunning()">
+      <div class="row mt-3" data-bind="if: roundIsOver">
         <div class="col">
-          <h3>Incorrect answers this round</h3>
+          <h3 data-bind="if: questionsFailedThisRound().length > 0">Incorrect answers this round</h3>
           <ul data-bind="foreach: questionsFailedThisRound">
             <li data-bind="text: $data"></li>
           </ul>
+          <p>Next player: <span data-bind="text: currentPlayer"></span>
         </div>
       </div>
     </div>
@@ -118,6 +123,7 @@
         this.currentQuestionIndex = ko.observable(0);
         this.questionsRaw = ko.observable('');
         this.questionsFailedThisRound = ko.observableArray([]);
+        this.roundIsOver = ko.observable(false);
 
         this.players = ko.computed(function() {
           return this.playersRaw().split(',');
@@ -171,7 +177,9 @@
 
         this.actionNope = () => {
           this.currentStep(0);
-          this.questionsFailedThisRound.push(this.currentQuestion());
+          if(this.currentQuestion()) {
+            this.questionsFailedThisRound.push(this.currentQuestion());
+          }
           this.currentQuestionIndex(this.currentQuestionIndex() + 1);
           this.sendJSON();
         }
@@ -182,6 +190,7 @@
           this.bankAmountThisRound(0);
           this.questionsFailedThisRound.removeAll();
           this.timerIsRunning(true);
+          this.roundIsOver(false);
           this.timeLeftRaw(this.roundDurationRaw());
           this.playMusic('game.mp3')
           this.sendJSON();
@@ -208,6 +217,7 @@
           clearInterval(intervalId);
           this.timerIsRunning(false);
           this.currentStep(0);
+          this.roundIsOver(true);
           // Consume the current question to make sure it's not displayed again next round
           this.currentQuestionIndex(this.currentQuestionIndex() + 1);
           this.playMusic("end.mp3");
