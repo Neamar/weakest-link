@@ -95,7 +95,7 @@
         <div class="col">
           <h3 data-bind="if: questionsFailedThisRound().length > 0">Incorrect answers this round</h3>
           <ul data-bind="foreach: questionsFailedThisRound">
-            <li data-bind="text: $data"></li>
+            <li data-bind="html: $data"></li>
           </ul>
           <p>Next player: <span data-bind="text: currentPlayer"></span>
         </div>
@@ -178,7 +178,7 @@
         this.actionNope = () => {
           this.currentStep(0);
           if(this.currentQuestion()) {
-            this.questionsFailedThisRound.push(this.currentQuestion());
+            this.questionsFailedThisRound.push("<strong>" + this.currentPlayer() + "</strong>: " + this.currentQuestion().replace(/</g, '&lt;'));
           }
           this.currentQuestionIndex(this.currentQuestionIndex() + 1);
           this.sendJSON();
