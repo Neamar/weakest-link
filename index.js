@@ -27,6 +27,7 @@ io.on('connection', (socket) => {
   console.log(`a ${isHost ? 'host' : 'player'} connected on game #${gameId}`);
 
   if(!rooms[gameId]) {
+    console.log('Creating a new game', gameId)
     rooms[gameId] = {
       host: null,
       players: [],
@@ -45,10 +46,6 @@ io.on('connection', (socket) => {
     });
 
     socket.emit('user_count', rooms[gameId].players.length);
-
-    socket.on('disconnect', () => {
-      rooms[gameId].host = null;
-    });
   }
   else {
     rooms[gameId].players.push(socket);
@@ -58,19 +55,23 @@ io.on('connection', (socket) => {
     }
 
     socket.emit('state_change', rooms[gameId].lastKnownState);
-    socket.on('disconnect', () => {
-      console.log('user disconnected from game', gameId);
-      const index = rooms[gameId].players.indexOf(socket);
-      if (index > -1) {
-        rooms[gameId].players.splice(index, 1);
-      }
-
-      if(rooms[gameId].players.length === 0 && !rooms[gameId].host) {
-        console.log('Terminating gameId ', gameId);
-        delete rooms[gameId];
-      }
-    });
   }
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected from game', gameId);
+    const index = rooms[gameId].players.indexOf(socket);
+    if (index > -1) {
+      rooms[gameId].players.splice(index, 1);
+    }
+    if(rooms[gameId].host === socket) {
+      rooms[gameId].host = null;
+    }
+
+    if(rooms[gameId].players.length === 0 && !rooms[gameId].host) {
+      console.log('Terminating gameId', gameId);
+      delete rooms[gameId];
+    }
+  });
 });
 
 const port = process.env.PORT || 3000;

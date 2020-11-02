@@ -90,6 +90,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
     const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get('game_id');
 
     let state = {
       steps: ko.observable([]),
@@ -111,7 +112,6 @@
     ko.applyBindings(state, document.getElementById('game'));
 
     let currentAudio;
-    const gameId = urlParams.get('game_id');
       var socket = io({query: { game_id: gameId }});
       socket.on('state_change', function(newStateString) {
         if(newStateString === '{}') {
@@ -133,15 +133,13 @@
             currentAudio.pause();
           }
           currentAudio = new Audio(newState.music);
-          currentAudio.volume = 0.35;
+          currentAudio.volume = 0.3;
           currentAudio.play();
         }
 
         if(!newState.timerIsRunning) {
           state.timeLeft(newState.roundDuration);
         }
-
-        console.log(newState)
       });
     </script>
   </body>
