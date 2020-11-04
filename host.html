@@ -16,11 +16,11 @@
     <div class="container-fluid mt-1" id="game">
       <div id="stats">
         <div class="stat_name">Banque totale</div>
-        <div class="stat_value" data-bind="text: bankAmountFormated"></div>
+        <div class="stat_value" data-bind="text: bankAmountFormatted"></div>
         <div class="stat_name">Banque du tour</div>
-        <div class="stat_value" data-bind="text: bankAmountThisRoundFormated"></div>
+        <div class="stat_value" data-bind="text: bankAmountThisRoundFormatted"></div>
         <div class="stat_name">Valeur de la chaîne</div>
-        <div class="stat_value" data-bind="text: currentAmountFormated"></div>
+        <div class="stat_value" data-bind="text: currentAmountFormatted"></div>
       </div>
       <div class="separator"></div>
 
@@ -33,7 +33,7 @@
           <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionDuDuDuDu">♪ DU DU DU DU ♪</button>
         </div>
         <div class="col">
-          <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionGoodbye">♪ AUREVOIR ♪</button>
+          <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionGoodbye">♪ AU REVOIR ♪</button>
         </div>
       </div>
 
@@ -135,8 +135,8 @@
         this.questionsFailedThisRound = ko.observableArray([]);
         this.roundIsOver = ko.observable(false);
 
-        this.bankAmountFormated = koFormattedNumber(this.bankAmount);
-        this.bankAmountThisRoundFormated = koFormattedNumber(this.bankAmountThisRound);
+        this.bankAmountFormatted = koFormattedNumber(this.bankAmount);
+        this.bankAmountThisRoundFormatted = koFormattedNumber(this.bankAmountThisRound);
 
         this.players = ko.computed(function() {
           return this.playersRaw().split(',');
@@ -159,7 +159,7 @@
         this.currentAmount = ko.computed(function() {
           return this.steps[this.currentStep()];
         }, this);
-        this.currentAmountFormated = koFormattedNumber(this.currentAmount);
+        this.currentAmountFormatted = koFormattedNumber(this.currentAmount);
 
         this.questions = ko.computed(function() {
           return this.questionsRaw().split('\n').filter(Boolean);
