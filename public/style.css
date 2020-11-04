@@ -73,3 +73,8 @@
   font-size: 1.4em;
   align-self: center;
 }
+
+#time_left {
+  font-family: monospace;
+  font-size: 35px;
+}

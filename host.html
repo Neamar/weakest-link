@@ -50,7 +50,7 @@
 
       <div class="row mt-3" data-bind="if: timerIsRunning">
         <div class="col text-center">
-          <p data-bind="text: timeLeft" class="lead" style="font-family: monospace"></p>
+          <p data-bind="text: timeLeft" class="lead" id="time_left"></p>
         </div>
       </div>
 
@@ -58,7 +58,7 @@
 
       <div class="row mt-3">
         <div class="col">
-          Nom des joueurs, séparé d'une virgule :<br />
+          Nom des joueurs, séparés par une virgule :<br />
           <small>Enlevez le nom du maillon faible après chaque tour !</small>
         </div>
       </div>
@@ -66,7 +66,7 @@
         <div class="input-group-prepend">
           <span class="input-group-text" id="basic-addon1">@</span>
         </div>
-        <input type="text" class="form-control" placeholder="Usernames (comma-separated)" aria-label="Usernames" aria-describedby="basic-addon1" data-bind="value: playersRaw, disable: timerIsRunning">
+        <input type="text" class="form-control" placeholder="Nom des joueurs (séparés par une virgule)" aria-describedby="basic-addon1" data-bind="value: playersRaw, disable: timerIsRunning">
       </div>
 
       <div class="row mt-3">
@@ -76,14 +76,14 @@
       </div>
       <div class="input-group">
         <div class="input-group-prepend">
-          <span class="input-group-text" id="basic-addon1">#</span>
+          <span class="input-group-text" id="basic-addon2">#</span>
         </div>
-        <input type="number" class="form-control" placeholder="Round duration" aria-label="Round duration" aria-describedby="basic-addon1" data-bind="value: roundDurationRaw, disable: timerIsRunning" min="10" max="150" step="10">
+        <input type="number" class="form-control" placeholder="Durée du tour" aria-describedby="basic-addon2" data-bind="value: roundDurationRaw, disable: timerIsRunning" min="10" max="150" step="10">
       </div>
       <div class="row mt-3">
         <div class="col">
-          <small>[Optional]</small> Questions, une par ligne :
-          <textarea class="form-control" placeholder="What is Question 1 ? (answer)" rows="3" data-bind="value: questionsRaw"></textarea>
+          <small>[Facultatif]</small> Questions, une par ligne :
+          <textarea class="form-control" placeholder="Quelle est la capitale de la France ? (Paris)" rows="3" data-bind="value: questionsRaw"></textarea>
         </div>
       </div>
       <div class="row mt-3">
@@ -91,7 +91,7 @@
           Page des joueurs : <a href="${PLAYER_URL}">${PLAYER_URL}</a> (joueurs connectés : <span data-bind="text: connectedPlayersCount"></span>)
           <span data-bind="if: timerIsRunning">
             <br />
-            <a href="#" data-bind="click: actionStopRound">Abandonner le tour</a>
+            <a href="#" data-bind="click: actionStopRound">Terminer le tour</a>
           </span>
         </div>
       </div>
