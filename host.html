@@ -37,7 +37,7 @@
         </div>
       </div>
 
-      <div data-bind="visible: timerIsRunning" id="round_control">
+      <div data-bind="if: timerIsRunning" id="round_control">
         <p class="player_name" data-bind="text: currentPlayer"></p>
         <p id="current_question" data-bind="if: hasQuestionAvailable"><span data-bind="text: currentQuestion"></span></p>
 
@@ -48,7 +48,7 @@
         <div class="v_separator"></div>
       </div>
 
-      <div class="row mt-3" data-bind="visible: timerIsRunning">
+      <div class="row mt-3" data-bind="if: timerIsRunning">
         <div class="col text-center">
           <p data-bind="text: timeLeft" class="lead" style="font-family: monospace"></p>
         </div>
@@ -58,8 +58,8 @@
 
       <div class="row mt-3">
         <div class="col">
-          Nom des joueurs, séparé d'une virgule:<br />
-          <small>Enlevez le nom du maillon faible après chaque tour!</small>
+          Nom des joueurs, séparé d'une virgule :<br />
+          <small>Enlevez le nom du maillon faible après chaque tour !</small>
         </div>
       </div>
       <div class="input-group ">
@@ -71,7 +71,7 @@
 
       <div class="row mt-3">
         <div class="col">
-          Durée du tour en secondes: (<span data-bind="text: roundDuration"></span>)
+          Durée du tour en secondes : (<span data-bind="text: roundDuration"></span>)
         </div>
       </div>
       <div class="input-group">
@@ -82,13 +82,13 @@
       </div>
       <div class="row mt-3">
         <div class="col">
-          <small>[Optional]</small> Questions du tour, une par ligne:
+          <small>[Optional]</small> Questions, une par ligne :
           <textarea class="form-control" placeholder="What is Question 1 ? (answer)" rows="3" data-bind="value: questionsRaw"></textarea>
         </div>
       </div>
       <div class="row mt-3">
         <div class="col text-center">
-          Page des joueurs: <a href="${PLAYER_URL}">${PLAYER_URL}</a> (joueurs connectés: <span data-bind="text: connectedPlayersCount"></span>)
+          Page des joueurs : <a href="${PLAYER_URL}">${PLAYER_URL}</a> (joueurs connectés : <span data-bind="text: connectedPlayersCount"></span>)
           <span data-bind="if: timerIsRunning">
             <br />
             <a href="#" data-bind="click: actionStopRound">Abandonner le tour</a>
@@ -101,7 +101,7 @@
           <ul data-bind="foreach: questionsFailedThisRound">
             <li data-bind="html: $data"></li>
           </ul>
-          <p>Prochain joueur: <span data-bind="text: currentPlayer"></span>
+          <p>Prochain joueur : <span data-bind="text: currentPlayer"></span>
         </div>
       </div>
     </div>
