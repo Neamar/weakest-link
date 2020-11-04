@@ -1,0 +1,75 @@
+#game {
+  max-width: 960px;
+  margin: auto;
+  padding: 20px 10px;
+}
+
+#stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  row-gap: 15px;
+  padding: 20px 0;
+}
+
+.stat_name {
+  grid-row: 2;
+  text-align: center;
+}
+.stat_value {
+  grid-row: 1;
+  text-align: center;
+  font-size: 1.4em;
+}
+
+.separator {
+  height: 1px;
+  width: 100%;
+  background-color: rgba(25,25,25, 0.2);
+}
+.v_separator {
+  height: 100%;
+  width: 1px;
+  background-color: rgba(25,25,25, 0.2);
+  margin: auto;
+}
+
+#round_control {
+  display: grid;
+  grid-template:
+  "player_name spacer question question" minmax(100px, auto)
+  "bank_button spacer nope_button correct_button" /1fr 20px 1fr 1fr;
+  gap: 10px;
+  padding: 20px 0;
+}
+
+#round_control .v_separator {
+  grid-area: spacer;
+}
+
+#round_control p {
+  margin: 0;
+}
+
+.player_name {
+  grid-area: player_name;
+  text-align: center;
+  font-size: 1.3em;
+  align-self: center;
+}
+
+#bank_button {
+  grid-area: bank_button;
+}
+#nope_button {
+  grid-area: nope_button;
+}
+#correct_button {
+  grid-area: correct_button;
+}
+#current_question {
+  grid-area: question;
+  text-align: center;
+  font-size: 1.4em;
+  align-self: center;
+}

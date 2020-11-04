@@ -7,25 +7,25 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.js"></script>
     <title>Host interface</title>
   </head>
   <body>
 
     <div class="container-fluid mt-1" id="game">
-      <div class="row">
-        <div class="col text-center">
-          Bank: <span data-bind="text: bankAmount"></span>
-        </div>
-        <div class="col text-center">
-          Bank this round: <span data-bind="text: bankAmountThisRound"></span>
-        </div>
-        <div class="col text-center">
-          Current amount: <span data-bind="text: currentAmount"></span>
-        </div>
+      <div id="stats">
+        <div class="stat_name">Banque totale</div>
+        <div class="stat_value" data-bind="text: bankAmountFormated"></div>
+        <div class="stat_name">Banque du tour</div>
+        <div class="stat_value" data-bind="text: bankAmountThisRoundFormated"></div>
+        <div class="stat_name">Valeur de la chaîne</div>
+        <div class="stat_value" data-bind="text: currentAmountFormated"></div>
       </div>
+      <div class="separator"></div>
+
       <button type="button" class="btn btn-info btn-lg btn-block" data-bind="click: actionStart, hidden: timerIsRunning">
-        <span data-bind="hidden: timerIsRunning">START ROUND</span>
+        <span data-bind="hidden: timerIsRunning">DÉBUT TOUR</span>
       </button>
 
       <div class="row mt-2" data-bind="hidden: timerIsRunning">
@@ -33,29 +33,33 @@
           <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionDuDuDuDu">♪ DU DU DU DU ♪</button>
         </div>
         <div class="col">
-          <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionGoodbye">♪ GOODBYE ♪</button>
+          <button type="button" class="btn btn-secondary btn-lg btn-block" data-bind="click: actionGoodbye">♪ AUREVOIR ♪</button>
         </div>
       </div>
 
-      <button type="button" class="btn btn-info btn-lg btn-block mt-2" disabled data-bind="visible: timerIsRunning">
-        <strong data-bind="text: currentPlayer"></strong><br />
-        <span data-bind="if: hasQuestionAvailable"><span data-bind="text: currentQuestion"></span><br /></span>
-      </button>
+      <div data-bind="visible: timerIsRunning" id="round_control">
+        <p class="player_name" data-bind="text: currentPlayer"></p>
+        <p id="current_question" data-bind="if: hasQuestionAvailable"><span data-bind="text: currentQuestion"></span></p>
 
-      <button type="button" class="btn btn-primary btn-lg btn-block mt-2" data-bind="click: actionBank, visible: timerIsRunning">BANK</button>
-      <button type="button" class="btn btn-success btn-lg btn-block" data-bind="click: actionCorrect, visible: timerIsRunning">CORRECT</button>
-      <button type="button" class="btn btn-danger btn-lg btn-block" data-bind="click: actionNope, visible: timerIsRunning">NOPE</button>
+        <button type="button" id="bank_button" class="btn btn-primary btn-lg btn-block mt-2" data-bind="click: actionBank">BANQUE</button>
+        <button type="button" id="nope_button" class="btn btn-danger btn-lg btn-block" data-bind="click: actionNope">FAUX</button>
+        <button type="button" id="correct_button" class="btn btn-success btn-lg btn-block" data-bind="click: actionCorrect">CORRECT</button>
 
-      <div class="row mt-3">
+        <div class="v_separator"></div>
+      </div>
+
+      <div class="row mt-3" data-bind="visible: timerIsRunning">
         <div class="col text-center">
-          <p data-bind="text: timeLeft, visible: timerIsRunning" class="lead" style="font-family: monospace"></p>
+          <p data-bind="text: timeLeft" class="lead" style="font-family: monospace"></p>
         </div>
       </div>
+
+
 
       <div class="row mt-3">
         <div class="col">
-          Enter players name, separated with a comma.<br />
-          <small>Remove the weakest link once the round has ended!</small>
+          Nom des joueurs, séparé d'une virgule:<br />
+          <small>Enlevez le nom du maillon faible après chaque tour!</small>
         </div>
       </div>
       <div class="input-group ">
@@ -67,7 +71,7 @@
 
       <div class="row mt-3">
         <div class="col">
-          How long (in seconds) should a round last? (<span data-bind="text: roundDuration"></span>)
+          Durée du tour en secondes: (<span data-bind="text: roundDuration"></span>)
         </div>
       </div>
       <div class="input-group">
@@ -78,26 +82,26 @@
       </div>
       <div class="row mt-3">
         <div class="col">
-          <small>[Optional]</small> Enter questions list here, separated with a newline :
+          <small>[Optional]</small> Questions du tour, une par ligne:
           <textarea class="form-control" placeholder="What is Question 1 ? (answer)" rows="3" data-bind="value: questionsRaw"></textarea>
         </div>
       </div>
       <div class="row mt-3">
         <div class="col text-center">
-          Players URL: <a href="${PLAYER_URL}">${PLAYER_URL}</a> (connected: <span data-bind="text: connectedPlayersCount"></span>)
+          Page des joueurs: <a href="${PLAYER_URL}">${PLAYER_URL}</a> (joueurs connectés: <span data-bind="text: connectedPlayersCount"></span>)
           <span data-bind="if: timerIsRunning">
             <br />
-            <a href="#" data-bind="click: actionStopRound">Stop round early</a>
+            <a href="#" data-bind="click: actionStopRound">Abandonner le tour</a>
           </span>
         </div>
       </div>
       <div class="row mt-3" data-bind="if: roundIsOver">
         <div class="col">
-          <h3 data-bind="if: questionsFailedThisRound().length > 0">Incorrect answers this round</h3>
+          <h3 data-bind="if: questionsFailedThisRound().length > 0">Mauvaises réponses ce tour</h3>
           <ul data-bind="foreach: questionsFailedThisRound">
             <li data-bind="html: $data"></li>
           </ul>
-          <p>Next player: <span data-bind="text: currentPlayer"></span>
+          <p>Prochain joueur: <span data-bind="text: currentPlayer"></span>
         </div>
       </div>
     </div>
@@ -109,12 +113,18 @@
       const gameId = urlParams.get('game_id');
       var socket = io({query: { game_id: gameId, host: true }});
 
+      function koFormattedNumber(observable) {
+        return ko.pureComputed(function() {
+          return new Intl.NumberFormat().format(observable())
+        }, this);
+      }
+
       function AppViewModel() {
         this.steps = [0, 50, 100, 200, 400, 1000, 2000, 3000, 4000, 5000]
         this.bankAmount = ko.observable(0);
         this.bankAmountThisRound = ko.observable(0);
         this.currentStep = ko.observable(0);
-        this.playersRaw = ko.observable('Player1,Player2,Player3');
+        this.playersRaw = ko.observable('Joueur 1,Joueur 2,Joueur 3');
         this.roundDurationRaw = ko.observable(150);
         this.timeLeftRaw = ko.observable(150);
         this.timerIsRunning = ko.observable(false);
@@ -124,6 +134,9 @@
         this.questionsRaw = ko.observable('');
         this.questionsFailedThisRound = ko.observableArray([]);
         this.roundIsOver = ko.observable(false);
+
+        this.bankAmountFormated = koFormattedNumber(this.bankAmount);
+        this.bankAmountThisRoundFormated = koFormattedNumber(this.bankAmountThisRound);
 
         this.players = ko.computed(function() {
           return this.playersRaw().split(',');
@@ -146,6 +159,7 @@
         this.currentAmount = ko.computed(function() {
           return this.steps[this.currentStep()];
         }, this);
+        this.currentAmountFormated = koFormattedNumber(this.currentAmount);
 
         this.questions = ko.computed(function() {
           return this.questionsRaw().split('\n').filter(Boolean);
@@ -178,7 +192,7 @@
         this.actionNope = () => {
           this.currentStep(0);
           if(this.currentQuestion()) {
-            this.questionsFailedThisRound.push("<strong>" + this.currentPlayer() + "</strong>: " + this.currentQuestion().replace(/</g, '&lt;'));
+            this.questionsFailedThisRound.push(`<strong>${this.currentPlayer()}</strong>: ${this.currentQuestion().replace(/</g, '&lt;')}`);
           }
           this.currentQuestionIndex(this.currentQuestionIndex() + 1);
           this.sendJSON();
