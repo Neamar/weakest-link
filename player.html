@@ -141,7 +141,6 @@
       const resumeOnClick = async () => {
         await audioContext.resume();
         state.audioBlocked(false);
-        console.log(state.audioBlocked)
         document.removeEventListener('click', resumeOnClick);
       };
       document.addEventListener('click', resumeOnClick);
