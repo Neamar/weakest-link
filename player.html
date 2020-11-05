@@ -84,6 +84,15 @@
       border: 2px solid red;
       width: 240px;
     }
+
+    #audio_blocked_indicator {
+      position: absolute;
+      bottom: 10px;
+      right: 0;
+      left: 0;
+      text-align: center;
+      cursor: pointer;
+    }
     </style>
   </head>
   <body>
@@ -97,6 +106,7 @@
 
         <div id="timer" data-bind="text: timeLeft"></div>
       </div>
+      <div id="audio_blocked_indicator" data-bind="if: audioBlocked">Cliquer ici pour activer l'audio</div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -111,6 +121,7 @@
       timeLeft: ko.observable(""),
       currentPlayer: ko.observable(""),
       disabled: ko.observable(false),
+      audioBlocked: ko.observable(false),
     };
     state.reversedSteps = ko.computed(function() {
       return this.steps().slice(0).reverse();
@@ -120,7 +131,21 @@
     };
 
     // Activates knockout.js
-    ko.applyBindings(state, document.getElementById('game'));
+    ko.applyBindings(state, document.body);
+
+    // Test if webaudio is active and if not, wait for first user input to start it
+    const audioContext = new AudioContext();
+    audioContext.resume();
+    if (audioContext.state === 'suspended') {
+      state.audioBlocked(true);
+      const resumeOnClick = async () => {
+        await audioContext.resume();
+        state.audioBlocked(false);
+        document.removeEventListener('click', resumeOnClick);
+      };
+      document.addEventListener('click', resumeOnClick);
+    }
+
 
     let currentAudio;
       var socket = io({query: { game_id: gameId }});
