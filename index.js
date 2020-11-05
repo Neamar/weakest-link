@@ -71,6 +71,10 @@ io.on('connection', (socket) => {
       console.log('Terminating gameId', gameId);
       delete rooms[gameId];
     }
+
+    if(rooms[gameId] && rooms[gameId].host) {
+      rooms[gameId].host.emit('user_count', rooms[gameId].players.length);
+    }
   });
 });
 
