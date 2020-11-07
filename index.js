@@ -42,7 +42,7 @@ io.on('connection', (socket) => {
     socket.on('update_state', function(newState) {
       console.log('Received a new state, broadcasting')
       rooms[gameId].lastKnownState = newState;
-      rooms[gameId].players.forEach(p => p.emit('state_change', newState))
+      rooms[gameId].players.forEach(p => p.emit('state_change', newState));
     });
 
     socket.emit('user_count', rooms[gameId].players.length);
@@ -65,6 +65,8 @@ io.on('connection', (socket) => {
     }
     if(rooms[gameId].host === socket) {
       rooms[gameId].host = null;
+      rooms[gameId].lastKnownState = "{}";
+      rooms[gameId].players.forEach(p => p.emit('state_change', "{}"));
     }
 
     if(rooms[gameId].players.length === 0 && !rooms[gameId].host) {

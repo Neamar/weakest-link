@@ -93,18 +93,51 @@
       text-align: center;
       cursor: pointer;
     }
+
+
+    #bank_total {
+      position: absolute;
+      left: 50%;
+      bottom: 15px;
+      background-image: url('Bank.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      text-align: center;
+      margin-left: -70px;
+      width: 140px;
+      height: 72px;
+      font-size: 35px;
+    }
+
+    #bank_total_wrapper {
+      position: absolute;
+      left: 50%;
+      bottom: 30px;
+      background-image: url('TotalBank.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      margin-left: -100px;
+      width: 200px;
+      height: 55px;
+    }
     </style>
   </head>
   <body>
     <div id="game_container">
       <div id="game">
         <div data-bind="visible: disabled" id="nohost">NO HOST CONNECTED</div>
-        <ul id="ladder" data-bind="foreach: reversedSteps">
-          <li data-bind="text: $data, class: $parent.valueStatus($index)"></li>
-        </ul>
-        <div id="bank" data-bind="text: bankAmountThisRound"></div>
+        <div data-bind="hidden: roundIsOver">
+          <ul id="ladder" data-bind="foreach: reversedSteps, hidden: disabled">
+            <li data-bind="text: $data, class: $parent.valueStatus($index)"></li>
+          </ul>
+          <div id="bank" data-bind="text: bankAmountThisRound"></div>
 
-        <div id="timer" data-bind="text: timeLeft"></div>
+          <div id="timer" data-bind="text: timeLeft"></div>
+        </div>
+        <div data-bind="visible: roundIsOver">
+          <div id="bank_total_wrapper">&nbsp;</div>
+          <div id="bank_total" data-bind="text: bankAmount"></div>
+        </div>
       </div>
       <div id="audio_blocked_indicator" data-bind="if: audioBlocked">Cliquer ici pour activer l'audio</div>
     </div>
@@ -115,12 +148,14 @@
 
     let state = {
       steps: ko.observable([]),
+      bankAmount: ko.observable(0),
       bankAmountThisRound: ko.observable(0),
       currentAmount: ko.observable(0),
       currentStep: ko.observable(0),
       timeLeft: ko.observable(""),
       currentPlayer: ko.observable(""),
       disabled: ko.observable(false),
+      roundIsOver: ko.observable(false),
       audioBlocked: ko.observable(false),
     };
     state.reversedSteps = ko.computed(function() {
@@ -160,7 +195,7 @@
 
         const newState = JSON.parse(newStateString);
         // Mirror changes on main object
-        ['steps', 'bankAmountThisRound', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep'].forEach(k => {
+        ['steps', 'bankAmount', 'bankAmountThisRound', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep', 'roundIsOver'].forEach(k => {
           state[k](newState[k]);
         });
 

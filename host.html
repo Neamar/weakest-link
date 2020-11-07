@@ -250,7 +250,7 @@
         var lastSentJson = {};
         this.sendJSON = () => {
           // Only send if something changed
-          const whitelist = ['steps', 'bankAmountThisRound', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep', 'music', 'timerIsRunning', 'roundDuration']
+          const whitelist = ['steps', 'bankAmount', 'bankAmountThisRound', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep', 'music', 'timerIsRunning', 'roundDuration', 'roundIsOver']
           const data = {};
           whitelist.forEach(k => {
             data[k] = typeof(this[k]) === "function" ? this[k]() : this[k];
