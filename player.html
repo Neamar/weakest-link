@@ -101,7 +101,7 @@
     <div id="game">
       <div v-show="notConnected" id="nohost">NO HOST CONNECTED</div>
       <ul id="ladder">
-        <li v-for="(step, index) in steps.slice().reverse()" v-bind:class="isCurrentAmount(step)">{{ step }}</li>
+        <li v-for="step in steps.slice().reverse()" v-bind:class="getClassForAmount(step)">{{ step }}</li>
       </ul>
       <div id="bank" >{{ bankAmountThisRound }}</div>
 
@@ -114,7 +114,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const gameId = urlParams.get('game_id');
 
-    // Instanciate Vue
+    // Instantiate Vue
     const vm = new Vue({
       el: '#game_container',
       data: {
@@ -125,13 +125,13 @@
         audioBlocked: true
       },
       methods: {
-        isCurrentAmount(step) {
+        getClassForAmount(step) {
           return this.currentAmount >= step ? 'active' : ''
         }
       }
     });
 
-     // Test if webaudio is active and if not, wait for first user input to start it
+    // Test if webaudio is active and if not, wait for first user input to start it
     const audioContext = new AudioContext();
     audioContext.resume();
     if (audioContext.state === 'suspended') {
@@ -158,7 +158,6 @@
       const newState = JSON.parse(newStateString);
       // Mirror changes on main object
       ['steps', 'bankAmountThisRound', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep'].forEach(k => {
-        console.log(newState[k])
         vm[k] = newState[k];
       });
 
@@ -172,7 +171,7 @@
         currentAudio.play();
       }
 
-      // Reset timer in the end of tour 
+      // Reset timer in the end of turn
       if(!newState.timerIsRunning) {
         vm.timeLeft = newState.roundDuration;
       }
