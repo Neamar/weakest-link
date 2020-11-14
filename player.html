@@ -1,10 +1,11 @@
 <!doctype html>
 <html>
-  <head>
-    <title>The weakest link</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@900&display=swap" rel="stylesheet">
-    <style>
+<head>
+  <title>The weakest link</title>
+  <!-- Import of Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@900&display=swap" rel="stylesheet">
+  <style>
     body {
       background: black;
       color: white;
@@ -93,90 +94,89 @@
       text-align: center;
       cursor: pointer;
     }
-    </style>
-  </head>
-  <body>
-    <div id="game_container">
-      <div id="game">
-        <div data-bind="visible: disabled" id="nohost">NO HOST CONNECTED</div>
-        <ul id="ladder" data-bind="foreach: reversedSteps">
-          <li data-bind="text: $data, class: $parent.valueStatus($index)"></li>
-        </ul>
-        <div id="bank" data-bind="text: bankAmountThisRound"></div>
+  </style>
+</head>
+<body>
+  <div id="game_container">
+    <div id="game">
+      <div v-show="notConnected" id="nohost">NO HOST CONNECTED</div>
+      <ul id="ladder">
+        <li v-for="(step, index) in steps.slice().reverse()" v-bind:class="isCurrentAmount(step)">{{ step }}</li>
+      </ul>
+      <div id="bank" >{{ bankAmountThisRound }}</div>
 
-        <div id="timer" data-bind="text: timeLeft"></div>
-      </div>
-      <div id="audio_blocked_indicator" data-bind="if: audioBlocked">Cliquer ici pour activer l'audio</div>
+      <div id="timer">{{ timeLeft }}</div>
     </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
+    <div id="audio_blocked_indicator" v-if="audioBlocked">Cliquer ici pour activer l'audio</div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
     const urlParams = new URLSearchParams(window.location.search);
     const gameId = urlParams.get('game_id');
 
-    let state = {
-      steps: ko.observable([]),
-      bankAmountThisRound: ko.observable(0),
-      currentAmount: ko.observable(0),
-      currentStep: ko.observable(0),
-      timeLeft: ko.observable(""),
-      currentPlayer: ko.observable(""),
-      disabled: ko.observable(false),
-      audioBlocked: ko.observable(false),
-    };
-    state.reversedSteps = ko.computed(function() {
-      return this.steps().slice(0).reverse();
-    }, state);
-    state.valueStatus = function(index) {
-      return (this.steps().length - this.currentStep() - 1) <= index() ? "active" : "";
-    };
+    // Instanciate Vue
+    const vm = new Vue({
+      el: '#game_container',
+      data: {
+        notConnected: true, 
+        steps: [],
+        bankAmountThisRound: 0,
+        timeLeft: 0,
+        audioBlocked: true
+      },
+      methods: {
+        isCurrentAmount(step) {
+          return this.currentAmount >= step ? 'active' : ''
+        }
+      }
+    });
 
-    // Activates knockout.js
-    ko.applyBindings(state, document.body);
-
-    // Test if webaudio is active and if not, wait for first user input to start it
+     // Test if webaudio is active and if not, wait for first user input to start it
     const audioContext = new AudioContext();
     audioContext.resume();
     if (audioContext.state === 'suspended') {
-      state.audioBlocked(true);
+      vm.audioBlocked = true;
       const resumeOnClick = async () => {
         await audioContext.resume();
-        state.audioBlocked(false);
+        vm.audioBlocked = false;
         document.removeEventListener('click', resumeOnClick);
       };
       document.addEventListener('click', resumeOnClick);
     }
 
-
     let currentAudio;
-      var socket = io({query: { game_id: gameId }});
-      socket.on('state_change', function(newStateString) {
-        if(newStateString === '{}') {
-          state.disabled(true);
-          return;
-        }
-        else if(state.disabled()) {
-          state.disabled(false);
-        }
+    var socket = io({query: { game_id: gameId }});
+    socket.on('state_change', function(newStateString) {
+      if(newStateString === '{}') {
+        vm.notConnected = true;
+        return;
+      }
+      else if(vm.notConnected) {
+        vm.notConnected = false;
+      }
 
-        const newState = JSON.parse(newStateString);
-        // Mirror changes on main object
-        ['steps', 'bankAmountThisRound', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep'].forEach(k => {
-          state[k](newState[k]);
-        });
-
-        if(newState.music) {
-          if(currentAudio) {
-            currentAudio.pause();
-          }
-          currentAudio = new Audio(newState.music);
-          currentAudio.volume = 0.3;
-          currentAudio.play();
-        }
-
-        if(!newState.timerIsRunning) {
-          state.timeLeft(newState.roundDuration);
-        }
+      const newState = JSON.parse(newStateString);
+      // Mirror changes on main object
+      ['steps', 'bankAmountThisRound', 'currentAmount', 'timeLeft', 'currentPlayer', 'currentStep'].forEach(k => {
+        console.log(newState[k])
+        vm[k] = newState[k];
       });
-    </script>
-  </body>
+
+      // Adding the audio
+      if(newState.music) {
+        if(currentAudio) {
+          currentAudio.pause();
+        }
+        currentAudio = new Audio(newState.music);
+        currentAudio.volume = 0.3;
+        currentAudio.play();
+      }
+
+      // Reset timer in the end of tour 
+      if(!newState.timerIsRunning) {
+        vm.timeLeft = newState.roundDuration;
+      }
+    });
+  </script>
+</body>
 </html>
