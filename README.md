@@ -3,7 +3,7 @@
 
 "Jouons... au maillon faible"
 
-Un projet simple pour retrouver l'ambiance du maillon faible.
+Un projet simple pour retrouver l'ambiance du maillon faible dans un cadre familial et privé.
 
 ## Comment jouer ?
 Rendez-vous sur [weakest-link.neamar.fr](weakest-link.neamar.fr) pour lancer une partie en tant que présentateur.
