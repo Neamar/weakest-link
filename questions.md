@@ -832,3 +832,6 @@ Au tir au fusil, quel nom donne-t-on au plateau d'argile servant de cible ? (pig
 Quel mois débute avec le jour de l'an ? (janvier)
 Quel tendon du pied porte le nom d'un héros grec ? (Achille)
 En France, par quel sigle désigne-t-on les entreprises ayant entre 11 et 249 salariés ? (PME)
+En France, quelle couleur associe-t-on aux numéros d'appels gratuits commencant par 0800 ? (vert)
+En 89, qui chante "casser la voix" ? (bruel)
+Quel mot rimant avec tournis désigne une torsion du cou ? (torticolis)
