@@ -1,4 +1,4 @@
-Combien de mètres cubes de terre peut-on retirer d’un trou ayant 2 m sur 2 m sur 2 mètres ? (0)
+Combien de mètres cubes de terre peut-on retirer d’un trou ayant 2 m sur 2 m sur 2 mètres ? (8)
 Dans quel type de ski slalome-t-on entre des bouées ? (ski nautique)
 Lors de quel millénaire Marie-Antoinette a-t-elle été reine de france ? (le deuxième)
 Quel pays le tunnel du Mont-blanc relie-t-il à la France ? (l'Italie)
