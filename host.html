@@ -104,6 +104,16 @@
           <p>Prochain joueur : <span data-bind="text: currentPlayer"></span>
         </div>
       </div>
+      <div class="row mt-3">
+        <div class="col">
+          <h3>Votes</h3>
+          <div data-bind="foreach: playersVotes">
+            <button type="button" class="btn btn-outline-secondary" data-bind="click: $root.addVote">
+              <span data-bind="text: $data[0]"></span>&nbsp;: <span data-bind="text: $data[1]"></span> votes
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
 
@@ -134,11 +144,13 @@
         this.questionsRaw = ko.observable('');
         this.questionsFailedThisRound = ko.observableArray([]);
         this.roundIsOver = ko.observable(false);
-
+        this.playersVotes = ko.observableArray([]);
         this.bankAmountFormatted = koFormattedNumber(this.bankAmount);
         this.bankAmountThisRoundFormatted = koFormattedNumber(this.bankAmountThisRound);
 
         this.players = ko.computed(function() {
+          const players = this.playersRaw().split(',');
+          this.playersVotes(players.map(p => [p, ko.observable(0)]));
           return this.playersRaw().split(',');
         }, this);
 
@@ -221,6 +233,10 @@
 
         this.actionDuDuDuDu = () => {
           this.playMusic("du-du-du-du.mp3");
+        }
+
+        this.addVote = function(playerVote) {
+          playerVote[1](playerVote[1]() + 1)
         }
 
         this.actionGoodbye = () => {
