@@ -19,7 +19,6 @@ Dans la Rome antique, quel est le dieu en l'honneur duquel on célébrait les f�
 Quel gâteau garni de chantilly bordé d'une couronne de choux à la crème porte le nom du saint patron des boulangers ? (saint honoré)
 Traditionnellement, avec quelle matière textile fabrique-t-on le tweed ? (laine)
 Comment appelle-t-on le chamois des Pyrénées ? (l'isard)
-
 Quel superhéros Françoise Dupont devient-elle en portant sa cape et son bonnet à pompon ? (fantomette)
 Dans un email, quel nom anglais désigne le rond jaune répresentant un visage souriant ? (smiley)
 Depuis août 2006, quel astre n'est plus officiellement considéré comme une planète du système solaire ? (pluton)
